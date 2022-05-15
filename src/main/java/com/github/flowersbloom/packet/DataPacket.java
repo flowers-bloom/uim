@@ -8,6 +8,7 @@ import lombok.Data;
  */
 @Data
 public class DataPacket extends BasePacket {
+    String senderId;
     String receiverId;
     String content;
 

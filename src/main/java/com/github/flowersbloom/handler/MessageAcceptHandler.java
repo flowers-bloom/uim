@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.flowersbloom.Command;
 import com.github.flowersbloom.packet.AckPacket;
+import com.github.flowersbloom.packet.ConfirmPacket;
+import com.github.flowersbloom.packet.DataPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,9 +35,11 @@ public class MessageAcceptHandler extends SimpleChannelInboundHandler<DatagramPa
                 notice(ackPacket);
                 break;
             case Command.DATA_PACKET:
-                ackPacket = new AckPacket();
-                ackPacket.setSerialNumber(serialNumber);
-                String out = JSON.toJSONString(ackPacket);
+                DataPacket dataPacket = JSON.parseObject(json, DataPacket.class);
+                ConfirmPacket confirmPacket = new ConfirmPacket();
+                confirmPacket.setSerialNumber(serialNumber);
+                confirmPacket.setSenderId(dataPacket.getSenderId());
+                String out = JSON.toJSONString(confirmPacket);
                 ctx.channel().writeAndFlush(new DatagramPacket(
                         Unpooled.copiedBuffer(out.getBytes(StandardCharsets.UTF_8)),
                         msg.sender())

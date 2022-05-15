@@ -2,9 +2,7 @@ package com.github.flowersbloom;
 
 import com.github.flowersbloom.handler.MessagePushHandler;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.Future;
@@ -43,7 +41,7 @@ public class NettyServer {
     public void run() {
         try {
             NioDatagramChannel channel = (NioDatagramChannel) bootstrap.bind(PORT).sync().channel();
-            System.out.println("NettyServer bind " + PORT + " success");
+            log.info("NettyServer bind " + PORT + " success");
 
             startHeartbeatDetectCycleTask();
 
@@ -66,7 +64,7 @@ public class NettyServer {
                 }
             }
         }, 0, NettyConstant.HEARTBEAT_DETECT_RATE_SECONDS, TimeUnit.SECONDS);
-        System.out.println("start heartbeat detect cycle task");
+        log.info("start heartbeat detect cycle task");
     }
 
     public void shutdown() {

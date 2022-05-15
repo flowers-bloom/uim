@@ -9,11 +9,10 @@ import com.github.flowersbloom.transfer.TransferFuture;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
+import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.Future;
@@ -34,6 +33,7 @@ public class NettyClient {
         String in = scanner.nextLine();
         while (!in.equals("exit")) {
             DataPacket dataPacket = new DataPacket();
+            dataPacket.setSenderId(userId);
             dataPacket.setReceiverId(userId);
             dataPacket.setContent(in);
 
