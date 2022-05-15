@@ -27,34 +27,66 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyClient {
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        initUserId(scanner);
+
         NettyClient nettyClient = new NettyClient();
 
-        Scanner scanner = new Scanner(System.in);
+        String inputTip = "请输入接收者数字身份id和消息内容，以两个;分隔，" +
+                "样例如（1;;welcome to uim.），或者输入exit退出：",
+                errTip = "格式错误，请重新输入：";
+        System.out.println(inputTip);
+        scanner.nextLine();
         String in = scanner.nextLine();
         while (!in.equals("exit")) {
-            DataPacket dataPacket = new DataPacket();
-            dataPacket.setSenderId(userId);
-            dataPacket.setReceiverId(userId);
-            dataPacket.setContent(in);
+            String[] params = in.split(";;");
+            if (!nettyClient.checkInput(params)) {
+                System.out.println(errTip);
+            }else {
+                DataPacket dataPacket = new DataPacket();
+                dataPacket.setSenderId(userId);
+                dataPacket.setReceiverId(params[0]);
+                dataPacket.setContent(params[1]);
 
-            DataPacketTransfer transfer = new DataPacketTransfer();
-            TransferFuture future = transfer.channel(nettyClient.datagramChannel)
-                    .dstAddress(serverAddress)
-                    .packet(dataPacket)
-                    .execute();
-            future.addListener(f -> {
-                if (f.isSuccess()) {
-                    log.debug("dataPacket send success");
-                }
-            });
-
+                DataPacketTransfer transfer = new DataPacketTransfer();
+                TransferFuture future = transfer.channel(nettyClient.datagramChannel)
+                        .dstAddress(serverAddress)
+                        .packet(dataPacket)
+                        .execute();
+                future.addListener(f -> {
+                    if (f.isSuccess()) {
+                        log.debug("dataPacket send success");
+                    }
+                });
+            }
             in = scanner.nextLine();
         }
         nettyClient.shutdown();
     }
 
-    private static final String userId = "1";
-    private static final InetSocketAddress localAddress = new InetSocketAddress(9000);
+    private static void initUserId(Scanner scanner) {
+        System.out.println("请输入你的数字身份id：");
+        while (!scanner.hasNextInt()) {
+            System.out.println("数字身份id不合法，请重新输入：");
+        }
+        userId = String.valueOf(scanner.nextInt());
+        System.out.println("数字身份设置成功：" + userId);
+    }
+
+    private boolean checkInput(String[] arr) {
+        if (arr.length != 2) {
+            return false;
+        }
+        try {
+            Long.parseLong(arr[0]);
+        }catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private static String userId = "1";
+    private static final InetSocketAddress localAddress = new InetSocketAddress(0);
     private static final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8080);
     private static final ScheduledExecutorService HEARTBEAT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private EventLoopGroup eventLoopGroup;
@@ -74,7 +106,7 @@ public class NettyClient {
             });
         try {
             datagramChannel = (NioDatagramChannel) bootstrap.bind(localAddress.getPort()).sync().channel();
-            System.out.println("NettyClient start success");
+            log.info("NettyClient start success");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -88,7 +120,7 @@ public class NettyClient {
             heartbeatPacket.setUserId(userId);
             sendMessage(JSON.toJSONString(heartbeatPacket), serverAddress);
         }, 0, NettyConstant.HEARTBEAT_SEND_RATE_SECONDS, TimeUnit.SECONDS);
-        System.out.println("start heartbeat send cycle task");
+        log.info("start heartbeat send cycle task");
     }
 
     public void sendMessage(String msg, InetSocketAddress socketAddress) {
@@ -102,7 +134,7 @@ public class NettyClient {
             Future<?> future = eventLoopGroup.shutdownGracefully().sync();
             future.addListener(f -> {
                 if (f.isSuccess()) {
-                    System.out.println("NettyClient eventLoopGroup shutdown success");
+                    log.info("NettyClient eventLoopGroup shutdown success");
                 }
             });
         } catch (InterruptedException e) {
