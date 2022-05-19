@@ -6,6 +6,7 @@ import com.github.flowersbloom.packet.DataPacket;
 import com.github.flowersbloom.packet.HeartbeatPacket;
 import com.github.flowersbloom.transfer.DataPacketTransfer;
 import com.github.flowersbloom.transfer.TransferFuture;
+import com.github.flowersbloom.util.RandomUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -27,16 +28,15 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyClient {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        initUserId(scanner);
-
         NettyClient nettyClient = new NettyClient();
 
-        String inputTip = "请输入接收者数字身份id和消息内容，以两个;分隔，" +
+        System.out.println("你的身份id为：" + userId);
+        String inputTip = "请输入接收者数字身份id和消息内容，以两个英文分号分隔，" +
                 "样例如（1;;welcome to uim.），或者输入exit退出：",
                 errTip = "格式错误，请重新输入：";
         System.out.println(inputTip);
-        scanner.nextLine();
+
+        Scanner scanner = new Scanner(System.in);
         String in = scanner.nextLine();
         while (!in.equals("exit")) {
             String[] params = in.split(";;");
@@ -64,15 +64,6 @@ public class NettyClient {
         nettyClient.shutdown();
     }
 
-    private static void initUserId(Scanner scanner) {
-        System.out.println("请输入你的数字身份id：");
-        while (!scanner.hasNextInt()) {
-            System.out.println("数字身份id不合法，请重新输入：");
-        }
-        userId = String.valueOf(scanner.nextInt());
-        System.out.println("数字身份设置成功：" + userId);
-    }
-
     private boolean checkInput(String[] arr) {
         if (arr.length != 2) {
             return false;
@@ -85,7 +76,11 @@ public class NettyClient {
         return true;
     }
 
-    private static String userId = "1";
+    /**
+     * userId长度为16位
+     */
+    private static String userId = String.valueOf(System.currentTimeMillis()).substring(5) +
+            RandomUtil.randomNumber(8);
     private static final InetSocketAddress localAddress = new InetSocketAddress(0);
     private static final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8080);
     private static final ScheduledExecutorService HEARTBEAT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
