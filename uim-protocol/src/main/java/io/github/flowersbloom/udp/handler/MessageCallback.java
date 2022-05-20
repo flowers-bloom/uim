@@ -1,6 +1,6 @@
-package com.github.flowersbloom.udp.handler;
+package io.github.flowersbloom.udp.handler;
 
-import com.github.flowersbloom.udp.packet.BasePacket;
+import io.github.flowersbloom.udp.packet.BasePacket;
 
 import java.util.ArrayList;
 import java.util.Collections;

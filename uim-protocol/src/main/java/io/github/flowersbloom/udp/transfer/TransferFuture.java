@@ -1,4 +1,4 @@
-package com.github.flowersbloom.udp.transfer;
+package io.github.flowersbloom.udp.transfer;
 
 public class TransferFuture {
     private volatile boolean success;

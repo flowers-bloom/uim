@@ -1,4 +1,4 @@
-package com.github.flowersbloom.udp.packet;
+package io.github.flowersbloom.udp.packet;
 
 import lombok.Data;
 

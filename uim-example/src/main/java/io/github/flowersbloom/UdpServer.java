@@ -1,7 +1,7 @@
-package com.github.flowersbloom;
+package io.github.flowersbloom;
 
-import com.github.flowersbloom.handler.MessagePushHandler;
-import com.github.flowersbloom.udp.NettyServer;
+import io.github.flowersbloom.handler.MessagePushHandler;
+import io.github.flowersbloom.udp.NettyServer;
 
 import java.util.Arrays;
 

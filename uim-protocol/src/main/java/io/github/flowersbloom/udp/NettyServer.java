@@ -1,4 +1,4 @@
-package com.github.flowersbloom.udp;
+package io.github.flowersbloom.udp;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;

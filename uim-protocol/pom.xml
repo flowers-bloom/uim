@@ -4,12 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>uim-demo</artifactId>
-        <groupId>com.github.flowersbloom</groupId>
+        <groupId>io.github.flowers-bloom</groupId>
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
 
     <artifactId>uim-protocol</artifactId>
+
+    <name>uim-protocol</name>
+    <description>The communication protocol of uim application.</description>
+    <url>https://github.com/flowers-bloom/uim-server</url>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -38,4 +43,35 @@
             <artifactId>lombok</artifactId>
         </dependency>
     </dependencies>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:https://github.com/flowers-bloom/uim-server.git</connection>
+        <developerConnection>scm:git:https://github.com/flowers-bloom/uim-server.git</developerConnection>
+        <url>git:https://github.com/flowers-bloom/uim-server.git</url>
+    </scm>
+    <developers>
+        <developer>
+            <name>flowers-bloom</name>
+            <email>moon_xjh@163.com</email>
+            <organization>github</organization>
+            <organizationUrl>https://github.com/flowers-bloom</organizationUrl>
+        </developer>
+    </developers>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshot</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>nexus-release</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
 </project>

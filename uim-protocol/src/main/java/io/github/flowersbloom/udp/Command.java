@@ -1,4 +1,4 @@
-package com.github.flowersbloom.udp;
+package io.github.flowersbloom.udp;
 
 
 public class Command {

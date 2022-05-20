@@ -1,10 +1,10 @@
-package com.github.flowersbloom;
+package io.github.flowersbloom;
 
-import com.github.flowersbloom.handler.MessageAcceptHandler;
-import com.github.flowersbloom.udp.NettyClient;
-import com.github.flowersbloom.udp.packet.DataPacket;
-import com.github.flowersbloom.udp.transfer.DataPacketTransfer;
-import com.github.flowersbloom.udp.transfer.TransferFuture;
+import io.github.flowersbloom.handler.MessageAcceptHandler;
+import io.github.flowersbloom.udp.NettyClient;
+import io.github.flowersbloom.udp.packet.DataPacket;
+import io.github.flowersbloom.udp.transfer.DataPacketTransfer;
+import io.github.flowersbloom.udp.transfer.TransferFuture;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;

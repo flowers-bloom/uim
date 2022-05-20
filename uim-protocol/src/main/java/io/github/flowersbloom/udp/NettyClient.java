@@ -1,7 +1,7 @@
-package com.github.flowersbloom.udp;
+package io.github.flowersbloom.udp;
 
 import com.alibaba.fastjson.JSON;
-import com.github.flowersbloom.udp.packet.HeartbeatPacket;
+import io.github.flowersbloom.udp.packet.HeartbeatPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

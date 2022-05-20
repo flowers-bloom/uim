@@ -1,4 +1,4 @@
-package com.github.flowersbloom.udp;
+package io.github.flowersbloom.udp;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
