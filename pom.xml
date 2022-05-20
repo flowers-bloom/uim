@@ -6,46 +6,57 @@
 
     <groupId>com.github.flowersbloom</groupId>
     <artifactId>uim-demo</artifactId>
-    <version>1.0</version>
+    <packaging>pom</packaging>
+    <version>1.0.0</version>
+    <modules>
+        <module>uim-protocol</module>
+        <module>uim-example</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <!--系统编译源代码的编码方式-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <netty.version>4.1.43.Final</netty.version>
+        <fastjson.version>1.2.76</fastjson.version>
+        <logging.version>2.2.2.RELEASE</logging.version>
+        <aladdin.version>1.0.0</aladdin.version>
+        <lombok.version>1.18.10</lombok.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.43.Final</version>
-        </dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
 
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.76</version>
-        </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
-            <version>2.2.2.RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-logging</artifactId>
+                <version>${logging.version}</version>
+            </dependency>
 
-        <dependency>
-            <groupId>io.github.flowers-bloom</groupId>
-            <artifactId>aladdin</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+            <dependency>
+                <groupId>io.github.flowers-bloom</groupId>
+                <artifactId>aladdin</artifactId>
+                <version>${aladdin.version}</version>
+            </dependency>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
