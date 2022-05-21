@@ -30,7 +30,8 @@ public class NettyClient {
      */
     public static String userId = String.valueOf(System.currentTimeMillis()).substring(5) +
             randomNumber(8);
-    private static final InetSocketAddress localAddress = new InetSocketAddress(0);
+    public static String userNickname = "令狐冲";
+    private static final InetSocketAddress localAddress = new InetSocketAddress(9000);
     private static final ScheduledExecutorService HEARTBEAT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private InetSocketAddress serverAddress;
     private EventLoopGroup eventLoopGroup;

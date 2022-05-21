@@ -2,7 +2,7 @@ package io.github.flowersbloom;
 
 import io.github.flowersbloom.handler.MessageAcceptHandler;
 import io.github.flowersbloom.udp.NettyClient;
-import io.github.flowersbloom.udp.packet.DataPacket;
+import io.github.flowersbloom.udp.packet.P2PDataPacket;
 import io.github.flowersbloom.udp.transfer.DataPacketTransfer;
 import io.github.flowersbloom.udp.transfer.TransferFuture;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 @Slf4j
-public class UdpClient {
+public class Client {
     private static final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8080);
 
     public static void main(String[] args) {
@@ -34,15 +34,15 @@ public class UdpClient {
             if (!checkInput(params)) {
                 System.out.println(errTip);
             }else {
-                DataPacket dataPacket = new DataPacket();
-                dataPacket.setSenderId(NettyClient.userId);
-                dataPacket.setReceiverId(params[0]);
-                dataPacket.setContent(params[1]);
+                P2PDataPacket p2PDataPacket = new P2PDataPacket();
+                p2PDataPacket.setSenderId(NettyClient.userId);
+                p2PDataPacket.setReceiverId(params[0]);
+                p2PDataPacket.setContent(params[1]);
 
                 DataPacketTransfer transfer = new DataPacketTransfer();
                 TransferFuture future = transfer.channel(nettyClient.datagramChannel)
                         .dstAddress(serverAddress)
-                        .packet(dataPacket)
+                        .packet(p2PDataPacket)
                         .execute();
                 future.addListener(f -> {
                     if (f.isSuccess()) {

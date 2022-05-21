@@ -6,6 +6,7 @@ import io.github.flowersbloom.udp.handler.MessageCallback;
 import io.github.flowersbloom.udp.handler.MessageListener;
 import io.github.flowersbloom.udp.NettyConstant;
 import io.github.flowersbloom.udp.packet.BasePacket;
+import io.github.flowersbloom.udp.packet.VideoDataPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +25,7 @@ public class DataPacketTransfer implements MessageListener {
     private InetSocketAddress address;
     private BasePacket dataPacket;
     private CompletableFuture<Integer> future;
+    private boolean sendSlice = false;
     private volatile boolean confirm = false;
 
     public DataPacketTransfer() {
@@ -45,11 +48,20 @@ public class DataPacketTransfer implements MessageListener {
         return this;
     }
 
+    public DataPacketTransfer isSendSlice(boolean sendSlice) {
+        this.sendSlice = sendSlice;
+        return this;
+    }
+
     public TransferFuture execute() {
         TransferFuture transferFuture = new TransferFuture();
         CompletableFuture.runAsync(() -> {
             for (int i = 0; i < 3 && !confirm; i++) {
-                sendDataPacket();
+                if (!sendSlice) {
+                    sendDataPacket(dataPacket);
+                }else {
+                    sendMultipleSlice();
+                }
                 try {
                     future.get(NettyConstant.MSG_SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 } catch (Exception e) {
@@ -65,9 +77,19 @@ public class DataPacketTransfer implements MessageListener {
         return transferFuture;
     }
 
-    private void sendDataPacket() {
+    private void sendMultipleSlice() {
+        VideoDataPacket videoDataPacket = (VideoDataPacket) dataPacket;
+        List<VideoDataPacket> packetList = videoDataPacket.transformSliceList(1000);
+        for (VideoDataPacket packet : packetList) {
+            sendDataPacket(packet);
+        }
+    }
+
+    private void sendDataPacket(BasePacket dataPacket) {
         String json = JSON.toJSONString(dataPacket);
-        ByteBuf byteBuf = Unpooled.copiedBuffer(json.getBytes(StandardCharsets.UTF_8));
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        log.info("bytes length:{}", bytes.length);
+        ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
         channel.writeAndFlush(new DatagramPacket(byteBuf, address));
     }
 

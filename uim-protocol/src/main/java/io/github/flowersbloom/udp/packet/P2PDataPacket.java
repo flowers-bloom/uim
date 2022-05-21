@@ -4,15 +4,15 @@ import io.github.flowersbloom.udp.Command;
 import lombok.Data;
 
 /**
- * 数据报文
+ * 点对点数据报文
  */
 @Data
-public class DataPacket extends BasePacket {
+public class P2PDataPacket extends BasePacket {
     String senderId;
     String receiverId;
     String content;
 
-    public DataPacket() {
-        this.command = Command.DATA_PACKET;
+    public P2PDataPacket() {
+        this.command = Command.P2P_DATA_PACKET;
     }
 }

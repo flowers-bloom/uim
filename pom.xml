@@ -24,10 +24,17 @@
         <logging.version>2.2.2.RELEASE</logging.version>
         <aladdin.version>1.0.0</aladdin.version>
         <lombok.version>1.18.10</lombok.version>
+        <uim-protocol.version>1.0.0-SNAPSHOT</uim-protocol.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.github.flowers-bloom</groupId>
+                <artifactId>uim-protocol</artifactId>
+                <version>${uim-protocol.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>

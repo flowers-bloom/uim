@@ -7,7 +7,7 @@ import io.github.flowersbloom.udp.handler.MessageCallback;
 import io.github.flowersbloom.udp.NettyConstant;
 import io.github.flowersbloom.udp.packet.AckPacket;
 import io.github.flowersbloom.udp.packet.ConfirmPacket;
-import io.github.flowersbloom.udp.packet.DataPacket;
+import io.github.flowersbloom.udp.packet.P2PDataPacket;
 import io.github.flowersbloom.udp.packet.HeartbeatPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -44,9 +44,9 @@ public class MessagePushHandler extends SimpleChannelInboundHandler<DatagramPack
                 }
                 NettyConstant.HEARTBEAT_ACTIVE_MAP.put(heartbeatPacket.getUserId(), System.currentTimeMillis());
                 break;
-            case Command.DATA_PACKET:
-                DataPacket dataPacket = JSON.parseObject(json, DataPacket.class);
-                InetSocketAddress address = NettyConstant.ADDRESS_ACTIVE_MAP.get(dataPacket.getReceiverId());
+            case Command.P2P_DATA_PACKET:
+                P2PDataPacket p2PDataPacket = JSON.parseObject(json, P2PDataPacket.class);
+                InetSocketAddress address = NettyConstant.ADDRESS_ACTIVE_MAP.get(p2PDataPacket.getReceiverId());
                 if (address != null) {
                     ctx.channel().writeAndFlush(new DatagramPacket(
                             Unpooled.copiedBuffer(dst), address
