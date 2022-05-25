@@ -14,12 +14,10 @@ public interface MessageCallback {
 
     public static void subscribe(MessageListener listener) {
         listenerList.add(listener);
-        System.out.println(listener + " subscribe");
     }
 
     public static void unsubscribe(MessageListener listener) {
         listenerList.remove(listener);
-        System.out.println(listener + " unsubscribe");
     }
 
     public default void notice(BasePacket basePacket) {

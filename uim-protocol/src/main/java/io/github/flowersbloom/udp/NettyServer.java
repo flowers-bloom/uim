@@ -22,6 +22,7 @@ public class NettyServer {
     public int port;
     private EventLoopGroup eventLoopGroup;
     private Bootstrap bootstrap;
+    public NioDatagramChannel channel;
 
     public NettyServer(int port, List<ChannelInboundHandler> handlerList) {
         this.port = port;
@@ -41,7 +42,7 @@ public class NettyServer {
 
     public void run() {
         try {
-            NioDatagramChannel channel = (NioDatagramChannel) bootstrap.bind(port).sync().channel();
+            channel = (NioDatagramChannel) bootstrap.bind(port).sync().channel();
             log.info("NettyServer bind " + port + " success");
 
             startHeartbeatDetectCycleTask();
@@ -60,7 +61,7 @@ public class NettyServer {
             for (Map.Entry<String, Long> entry : entrySet) {
                 if (currentTimeMillis - entry.getValue() >= NettyConstant.HEARTBEAT_TIMEOUT_SECONDS * 1000) {
                     NettyConstant.HEARTBEAT_ACTIVE_MAP.remove(entry.getKey());
-                    NettyConstant.ADDRESS_ACTIVE_MAP.remove(entry.getKey());
+                    NettyConstant.USER_ACTIVE_MAP.remove(entry.getKey());
                     log.info("userId:{}, address:{} inactive", entry.getKey(), entry.getValue());
                 }
             }

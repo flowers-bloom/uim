@@ -1,10 +1,12 @@
 package io.github.flowersbloom.udp;
 
 import com.alibaba.fastjson.JSON;
+import io.github.flowersbloom.udp.entity.User;
+import io.github.flowersbloom.udp.packet.BasePacket;
 import io.github.flowersbloom.udp.packet.HeartbeatPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -12,36 +14,29 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class NettyClient {
-    /**
-     * userId长度为16位
-     */
-    public static String userId = String.valueOf(System.currentTimeMillis()).substring(5) +
-            randomNumber(8);
-    public static String userNickname = "令狐冲";
-    private static final InetSocketAddress localAddress = new InetSocketAddress(9000);
     private static final ScheduledExecutorService HEARTBEAT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    public final User user;
     private InetSocketAddress serverAddress;
     private EventLoopGroup eventLoopGroup;
-    private Bootstrap bootstrap;
+    public Bootstrap bootstrap;
     public NioDatagramChannel datagramChannel;
 
-    public NettyClient(InetSocketAddress serverAddress, List<ChannelInboundHandler> handlerList) {
+    public NettyClient(User user, InetSocketAddress serverAddress, List<ChannelInboundHandler> handlerList) {
+        this.user = user;
         this.serverAddress = serverAddress;
 
-        eventLoopGroup = new NioEventLoopGroup(1);
+        eventLoopGroup = new NioEventLoopGroup(10);
         bootstrap = new Bootstrap();
         bootstrap.group(eventLoopGroup)
                 .channel(NioDatagramChannel.class)
@@ -54,7 +49,7 @@ public class NettyClient {
                     }
                 });
         try {
-            datagramChannel = (NioDatagramChannel) bootstrap.bind(localAddress.getPort()).sync().channel();
+            datagramChannel = (NioDatagramChannel) bootstrap.bind(user.getAddress().getPort()).sync().channel();
             log.info("NettyClient start success");
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -63,26 +58,20 @@ public class NettyClient {
         startHeartbeatCycleTask();
     }
 
-    private static String randomNumber(int length) {
-        Random random = new Random();
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            builder.append(random.nextInt(10));
-        }
-        return builder.toString();
-    }
-
-    public void startHeartbeatCycleTask() {
+    private void startHeartbeatCycleTask() {
         HEARTBEAT_EXECUTOR.scheduleAtFixedRate(() -> {
+            ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
             HeartbeatPacket heartbeatPacket = new HeartbeatPacket();
-            heartbeatPacket.setUserId(userId);
-            sendMessage(JSON.toJSONString(heartbeatPacket), serverAddress);
+            heartbeatPacket.setUser(user);
+            byteBuf.writeLong(BasePacket.generateSerialNumber());
+            byteBuf.writeByte(heartbeatPacket.getCommand());
+            byteBuf.writeBytes(JSON.toJSONString(heartbeatPacket).getBytes());
+            sendMessage(byteBuf, serverAddress);
         }, 0, NettyConstant.HEARTBEAT_SEND_RATE_SECONDS, TimeUnit.SECONDS);
         log.info("start heartbeat send cycle task");
     }
 
-    public void sendMessage(String msg, InetSocketAddress socketAddress) {
-        ByteBuf buffer = Unpooled.copiedBuffer(msg, CharsetUtil.UTF_8);
+    public void sendMessage(ByteBuf buffer, InetSocketAddress socketAddress) {
         datagramChannel.writeAndFlush(new DatagramPacket(buffer, socketAddress));
     }
 

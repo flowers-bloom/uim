@@ -8,4 +8,5 @@ public class Command {
     public static final byte CONFIRM_PACKET = 4;
     public static final byte BROADCAST_DATA_PACKET = 5;
     public static final byte VIDEO_DATA_PACKET = 6;
+    public static final byte VIDEO_HEADER_PACKET = 7;
 }

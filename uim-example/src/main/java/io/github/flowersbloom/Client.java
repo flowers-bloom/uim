@@ -2,11 +2,18 @@ package io.github.flowersbloom;
 
 import io.github.flowersbloom.handler.MessageAcceptHandler;
 import io.github.flowersbloom.udp.NettyClient;
+import io.github.flowersbloom.udp.entity.User;
 import io.github.flowersbloom.udp.packet.P2PDataPacket;
-import io.github.flowersbloom.udp.transfer.DataPacketTransfer;
+import io.github.flowersbloom.udp.packet.VideoDataPacket;
+import io.github.flowersbloom.udp.packet.VideoHeaderPacket;
+import io.github.flowersbloom.udp.transfer.PacketTransfer;
 import io.github.flowersbloom.udp.transfer.TransferFuture;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -16,12 +23,84 @@ public class Client {
     private static final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8080);
 
     public static void main(String[] args) {
+        User user = new User("2", "tom", "",
+                new InetSocketAddress(9001));
         NettyClient nettyClient = new NettyClient(
+                user,
                 serverAddress,
                 Arrays.asList(new MessageAcceptHandler())
         );
 
-        System.out.println("你的身份id为：" + NettyClient.userId);
+        execBatchTask(nettyClient.datagramChannel);
+
+        //run(nettyClient, user);
+
+        //nettyClient.shutdown();
+        try {
+            nettyClient.datagramChannel.closeFuture().await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void execBatchTask(NioDatagramChannel channel) {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                sendFileStream(channel);
+            }).start();
+        }
+    }
+
+    private static void sendFileStream(NioDatagramChannel channel) {
+        try {
+            FileInputStream inputStream = new FileInputStream("codec.h264");
+            byte[] bytes = new byte[25000];
+            int n;
+
+            n = inputStream.read(bytes);
+
+            VideoHeaderPacket videoHeaderPacket = new VideoHeaderPacket();
+            videoHeaderPacket.setBytesLength(n);
+            VideoDataPacket videoDataPacket = new VideoDataPacket();
+            if (n == bytes.length) {
+                videoDataPacket.setBytes(bytes);
+            }else {
+                byte[] dst = new byte[n];
+                System.arraycopy(bytes, 0, dst, 0, n);
+                videoDataPacket.setBytes(dst);
+            }
+
+            long cur = System.currentTimeMillis();
+            PacketTransfer transfer = new PacketTransfer();
+            TransferFuture future = transfer.channel(channel)
+                    .dstAddress(new InetSocketAddress("localhost", 9000))
+                    .headerPacket(videoHeaderPacket)
+                    .dataPacket(videoDataPacket)
+                    .isSlice(true)
+                    .execute();
+            future.addListener(f -> {
+                if (f.isSuccess()) {
+                    log.info("videoPacket send success, serialNumber:{}, cost:{} ms",
+                            videoHeaderPacket.getSerialNumber(),
+                            (System.currentTimeMillis() - cur));
+                }
+            });
+
+            inputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void run(NettyClient nettyClient, User user) {
+        System.out.println("你的身份id为：" + user.getUserId());
         String inputTip = "请输入接收者数字身份id和消息内容，以两个英文分号分隔，" +
                 "样例如（1;;welcome to uim.），或者输入exit退出：",
                 errTip = "格式错误，请重新输入：";
@@ -35,14 +114,14 @@ public class Client {
                 System.out.println(errTip);
             }else {
                 P2PDataPacket p2PDataPacket = new P2PDataPacket();
-                p2PDataPacket.setSenderId(NettyClient.userId);
+                p2PDataPacket.setSenderId(user.getUserId());
                 p2PDataPacket.setReceiverId(params[0]);
                 p2PDataPacket.setContent(params[1]);
 
-                DataPacketTransfer transfer = new DataPacketTransfer();
+                PacketTransfer transfer = new PacketTransfer();
                 TransferFuture future = transfer.channel(nettyClient.datagramChannel)
                         .dstAddress(serverAddress)
-                        .packet(p2PDataPacket)
+                        .dataPacket(p2PDataPacket)
                         .execute();
                 future.addListener(f -> {
                     if (f.isSuccess()) {
@@ -52,7 +131,6 @@ public class Client {
             }
             in = scanner.nextLine();
         }
-        nettyClient.shutdown();
     }
 
     private static boolean checkInput(String[] arr) {

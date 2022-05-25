@@ -1,6 +1,7 @@
 package io.github.flowersbloom.udp;
 
-import java.net.InetSocketAddress;
+import io.github.flowersbloom.udp.entity.User;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NettyConstant {
@@ -27,7 +28,7 @@ public class NettyConstant {
     /**
      * 消息发送超时时间
      */
-    public static final int MSG_SEND_TIMEOUT_SECONDS = 3;
+    public static final int MSG_SEND_TIMEOUT_SECONDS = 5;
 
     /**
      * 活跃心跳
@@ -37,5 +38,5 @@ public class NettyConstant {
     /**
      * 活跃地址
      */
-    public static final ConcurrentHashMap<String, InetSocketAddress> ADDRESS_ACTIVE_MAP = new ConcurrentHashMap<>(INIT_CAPACITY);
+    public static final ConcurrentHashMap<String, User> USER_ACTIVE_MAP = new ConcurrentHashMap<>(INIT_CAPACITY);
 }

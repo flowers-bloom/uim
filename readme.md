@@ -9,6 +9,14 @@ uim 是基于 udp 协议通信的 im 项目，当前为服务端部分。
 
 - udp 丢包问题处理
 
+## 报文格式
+
+```text
+1.serialNumber(long) 报文序号
+2.command(byte) 报文类型
+3.content(byte[]) 报文内容
+```
+
 ## 丢包问题处理思路
 
 消息发送流程：
