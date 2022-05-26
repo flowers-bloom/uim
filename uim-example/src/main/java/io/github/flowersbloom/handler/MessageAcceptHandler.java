@@ -50,12 +50,10 @@ public class MessageAcceptHandler extends SimpleChannelInboundHandler<DatagramPa
 
         switch (command) {
             case Command.ACK_PACKET:
-                executorService.execute(() -> {
-                    AckPacket ackPacket = new AckPacket();
-                    ackPacket.setSerialNumber(serialNumber);
-                    notice(ackPacket);
-                    log.info("serialNumber:{} ack", serialNumber);
-                });
+                AckPacket ackPacket = new AckPacket();
+                ackPacket.setSerialNumber(serialNumber);
+                notice(ackPacket);
+                log.info("serialNumber:{} ack", serialNumber);
                 break;
             case Command.P2P_DATA_PACKET:
                 byte[] dst = new byte[byteBuf.readableBytes()];

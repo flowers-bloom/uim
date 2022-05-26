@@ -9,6 +9,7 @@ import io.github.flowersbloom.udp.packet.VideoDataPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
@@ -16,44 +17,22 @@ import java.util.List;
 import java.util.concurrent.*;
 
 @Slf4j
+@Data
 public class PacketTransfer implements MessageListener {
-    private static ExecutorService executorService = Executors.newCachedThreadPool();
-    private Channel channel;
-    private InetSocketAddress address;
-    private BasePacket dataPacket;
-    private BasePacket headerPacket;
-    private CyclicBarrier cyclicBarrier;
-    private boolean isSlice = false;
+    private static final ExecutorService executorService = Executors.newCachedThreadPool();
+    private final CyclicBarrier cyclicBarrier;
     private volatile boolean confirm = false;
 
-    public PacketTransfer() {
+    private Channel channel;
+    private InetSocketAddress address;
+    private BasePacket headerPacket;
+    private BasePacket dataPacket;
+    private boolean isSlice;
+
+
+    PacketTransfer() {
         cyclicBarrier = new CyclicBarrier(2);
         MessageCallback.subscribe(this);
-    }
-
-    public PacketTransfer channel(Channel channel) {
-        this.channel = channel;
-        return this;
-    }
-
-    public PacketTransfer dstAddress(InetSocketAddress address) {
-        this.address = address;
-        return this;
-    }
-
-    public PacketTransfer dataPacket(BasePacket dataPacket) {
-        this.dataPacket = dataPacket;
-        return this;
-    }
-
-    public PacketTransfer isSlice(boolean isSlice) {
-        this.isSlice = isSlice;
-        return this;
-    }
-
-    public PacketTransfer headerPacket(BasePacket basePacket) {
-        this.headerPacket = basePacket;
-        return this;
     }
 
     public TransferFuture execute() {

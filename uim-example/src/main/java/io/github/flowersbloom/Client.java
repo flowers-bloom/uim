@@ -6,8 +6,10 @@ import io.github.flowersbloom.udp.entity.User;
 import io.github.flowersbloom.udp.packet.P2PDataPacket;
 import io.github.flowersbloom.udp.packet.VideoDataPacket;
 import io.github.flowersbloom.udp.packet.VideoHeaderPacket;
-import io.github.flowersbloom.udp.transfer.PacketTransfer;
+import io.github.flowersbloom.udp.transfer.MultiplePacketTransferBuilder;
+import io.github.flowersbloom.udp.transfer.SinglePacketTransferBuilder;
 import io.github.flowersbloom.udp.transfer.TransferFuture;
+import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,7 +17,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.Scanner;
 
 @Slf4j
@@ -23,17 +24,17 @@ public class Client {
     private static final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8080);
 
     public static void main(String[] args) {
-        User user = new User("2", "tom", "",
+        User user = new User("1", "tom", "",
                 new InetSocketAddress(9001));
         NettyClient nettyClient = new NettyClient(
                 user,
                 serverAddress,
-                Arrays.asList(new MessageAcceptHandler())
+                new ChannelInboundHandler[]{new MessageAcceptHandler()}
         );
 
         execBatchTask(nettyClient.datagramChannel);
 
-        //run(nettyClient, user);
+//        run(nettyClient, user);
 
         //nettyClient.shutdown();
         try {
@@ -76,12 +77,12 @@ public class Client {
             }
 
             long cur = System.currentTimeMillis();
-            PacketTransfer transfer = new PacketTransfer();
-            TransferFuture future = transfer.channel(channel)
+            MultiplePacketTransferBuilder builder = new MultiplePacketTransferBuilder();
+            TransferFuture future = builder.channel(channel)
                     .dstAddress(new InetSocketAddress("localhost", 9000))
                     .headerPacket(videoHeaderPacket)
                     .dataPacket(videoDataPacket)
-                    .isSlice(true)
+                    .build()
                     .execute();
             future.addListener(f -> {
                 if (f.isSuccess()) {
@@ -118,10 +119,11 @@ public class Client {
                 p2PDataPacket.setReceiverId(params[0]);
                 p2PDataPacket.setContent(params[1]);
 
-                PacketTransfer transfer = new PacketTransfer();
-                TransferFuture future = transfer.channel(nettyClient.datagramChannel)
+                SinglePacketTransferBuilder builder = new SinglePacketTransferBuilder();
+                TransferFuture future = builder.channel(nettyClient.datagramChannel)
                         .dstAddress(serverAddress)
                         .dataPacket(p2PDataPacket)
+                        .build()
                         .execute();
                 future.addListener(f -> {
                     if (f.isSuccess()) {

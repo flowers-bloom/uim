@@ -1,7 +1,9 @@
 package io.github.flowersbloom.udp.packet;
 
+import com.alibaba.fastjson.JSON;
 import io.github.flowersbloom.udp.Command;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import lombok.Data;
 
 import java.util.List;
@@ -21,7 +23,13 @@ public class P2PDataPacket extends BasePacket {
 
     @Override
     public ByteBuf toNewBuf() {
-        return null;
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
+        this.serialNumber = generateSerialNumber();
+        byteBuf.writeLong(this.serialNumber);
+        byteBuf.writeByte(command);
+        String json = JSON.toJSONString(this);
+        byteBuf.writeBytes(json.getBytes());
+        return byteBuf;
     }
 
     @Override
