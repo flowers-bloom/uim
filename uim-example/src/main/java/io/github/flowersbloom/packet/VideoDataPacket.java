@@ -7,7 +7,6 @@ import io.netty.buffer.ByteBufAllocator;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,26 +22,20 @@ public class VideoDataPacket extends BasePacket {
     }
 
     @Override
-    public ByteBuf toNewBuf() {
-        return null;
-    }
-
-    @Override
     public List<ByteBuf> toNewBufList(long serialNumber) {
-        List<ByteBuf> list = new ArrayList<>();
-        this.serialNumber = serialNumber;
+        List<ByteBuf> bufList = super.toNewBufList(serialNumber);
         for (int i = 0, sliceNum = 1; i < bytes.length; i+=DEFAULT_SLICE_LENGTH, sliceNum++) {
             int length = Math.min(bytes.length - i, DEFAULT_SLICE_LENGTH);
             byte[] raw = new byte[length];
             System.arraycopy(bytes, i, raw, 0, length);
 
             ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
-            list.add(byteBuf);
+            bufList.add(byteBuf);
             byteBuf.writeLong(this.serialNumber);
             byteBuf.writeByte(this.command);
             byteBuf.writeInt(sliceNum);
             byteBuf.writeBytes(raw);
         }
-        return list;
+        return bufList;
     }
 }

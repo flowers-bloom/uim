@@ -1,20 +1,18 @@
-package io.github.flowersbloom.udp.packet;
+package io.github.flowersbloom.packet;
 
 import com.alibaba.fastjson.JSON;
-import io.github.flowersbloom.udp.Command;
-import io.github.flowersbloom.udp.entity.User;
+import io.github.flowersbloom.command.BizCommand;
+import io.github.flowersbloom.udp.packet.BasePacket;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
-/**
- * 心跳报文
- */
 @Data
-public class HeartbeatPacket extends BasePacket {
-    User user;
+public class AddressDataPacket extends BasePacket {
+    String ip;
+    int port;
 
-    public HeartbeatPacket() {
-        this.command = Command.HEARTBEAT_PACKET;
+    public AddressDataPacket() {
+        this.command = BizCommand.ADDRESS_DATA_PACKET;
     }
 
     @Override

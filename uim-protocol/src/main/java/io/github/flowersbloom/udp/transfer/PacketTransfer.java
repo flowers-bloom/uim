@@ -86,7 +86,7 @@ public class PacketTransfer implements MessageListener {
     }
 
     private void sendPacket(BasePacket basePacket) {
-        ByteBuf byteBuf = basePacket.toNewBuf();
+        ByteBuf byteBuf = basePacket.toNewBuf(basePacket.serialNumber);
         channel.writeAndFlush(new DatagramPacket(byteBuf, address));
     }
 

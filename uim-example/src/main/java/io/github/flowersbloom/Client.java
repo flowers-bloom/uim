@@ -24,17 +24,17 @@ public class Client {
     private static final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8080);
 
     public static void main(String[] args) {
-        User user = new User("1", "tom", "",
-                new InetSocketAddress(9001));
+        User user = new User("2", "tom", "",
+                new InetSocketAddress(9002));
         NettyClient nettyClient = new NettyClient(
                 user,
                 serverAddress,
                 new ChannelInboundHandler[]{new MessageAcceptHandler()}
         );
 
-        execBatchTask(nettyClient.datagramChannel);
+//        execBatchTask(nettyClient.datagramChannel);
 
-//        run(nettyClient, user);
+        run(nettyClient, user);
 
         //nettyClient.shutdown();
         try {

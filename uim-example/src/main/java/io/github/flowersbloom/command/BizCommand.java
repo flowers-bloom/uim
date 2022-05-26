@@ -12,4 +12,7 @@ public class BizCommand extends Command {
     public static final byte VIDEO_HEADER_PACKET = 23;
     public static final byte ACTIVE_QUERY_PACKET = 24;
     public static final byte ACTIVE_DATA_PACKET = 25;
+    public static final byte ADDRESS_QUERY_PACKET = 26;
+    public static final byte ADDRESS_DATA_PACKET = 27;
+    public static final byte VIDEO_CALL_PACKET = 28;
 }

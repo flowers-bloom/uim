@@ -67,7 +67,7 @@ public class NettyClient {
         HEARTBEAT_EXECUTOR.scheduleAtFixedRate(() -> {
             HeartbeatPacket heartbeatPacket = new HeartbeatPacket();
             heartbeatPacket.setUser(user);
-            ByteBuf byteBuf = heartbeatPacket.toNewBuf();
+            ByteBuf byteBuf = heartbeatPacket.toNewBuf(0);
             sendMessage(byteBuf, serverAddress);
         }, 0, NettyConstant.HEARTBEAT_SEND_RATE_SECONDS, TimeUnit.SECONDS);
         log.info("start heartbeat send cycle task");

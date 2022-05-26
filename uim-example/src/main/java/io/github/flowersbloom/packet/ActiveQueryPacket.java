@@ -3,26 +3,20 @@ package io.github.flowersbloom.packet;
 import io.github.flowersbloom.command.BizCommand;
 import io.github.flowersbloom.udp.packet.BasePacket;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
+import lombok.Data;
 
-import java.util.List;
-
+@Data
 public class ActiveQueryPacket extends BasePacket {
+    String userId;
+
     public ActiveQueryPacket() {
         this.command = BizCommand.ACTIVE_QUERY_PACKET;
     }
 
     @Override
-    public ByteBuf toNewBuf() {
-        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
-        this.serialNumber = generateSerialNumber();
-        byteBuf.writeLong(this.serialNumber);
-        byteBuf.writeByte(this.command);
+    public ByteBuf toNewBuf(long serialNumber) {
+        ByteBuf byteBuf = super.toNewBuf(serialNumber);
+        byteBuf.writeBytes(userId.getBytes());
         return byteBuf;
-    }
-
-    @Override
-    public List<ByteBuf> toNewBufList(long serialNumber) {
-        return null;
     }
 }

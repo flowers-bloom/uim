@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import io.github.flowersbloom.command.BizCommand;
 import io.github.flowersbloom.udp.packet.BasePacket;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * 点对点数据报文
@@ -23,18 +20,10 @@ public class P2PDataPacket extends BasePacket {
     }
 
     @Override
-    public ByteBuf toNewBuf() {
-        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
-        this.serialNumber = generateSerialNumber();
-        byteBuf.writeLong(this.serialNumber);
-        byteBuf.writeByte(command);
+    public ByteBuf toNewBuf(long serialNumber) {
+        ByteBuf byteBuf = super.toNewBuf(serialNumber);
         String json = JSON.toJSONString(this);
         byteBuf.writeBytes(json.getBytes());
         return byteBuf;
-    }
-
-    @Override
-    public List<ByteBuf> toNewBufList(long serialNumber) {
-        return null;
     }
 }
