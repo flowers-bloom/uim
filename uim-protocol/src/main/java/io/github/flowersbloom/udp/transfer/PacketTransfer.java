@@ -1,6 +1,5 @@
 package io.github.flowersbloom.udp.transfer;
 
-import io.github.flowersbloom.udp.Command;
 import io.github.flowersbloom.udp.NettyConstant;
 import io.github.flowersbloom.udp.handler.MessageCallback;
 import io.github.flowersbloom.udp.handler.MessageListener;
@@ -93,8 +92,7 @@ public class PacketTransfer implements MessageListener {
     @Override
     public void handle(BasePacket basePacket) {
         if ((basePacket.getSerialNumber() == dataPacket.getSerialNumber() ||
-                (headerPacket != null && basePacket.getSerialNumber() == headerPacket.getSerialNumber()))
-                && basePacket.getCommand() == Command.ACK_PACKET) {
+                (headerPacket != null && basePacket.getSerialNumber() == headerPacket.getSerialNumber()))) {
             confirm = true;
             try {
                 cyclicBarrier.await();
