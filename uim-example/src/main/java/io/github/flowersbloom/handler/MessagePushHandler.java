@@ -1,9 +1,9 @@
 package io.github.flowersbloom.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.github.flowersbloom.command.BizCommand;
-import io.github.flowersbloom.packet.BroadcastDataPacket;
-import io.github.flowersbloom.packet.P2PDataPacket;
+import io.github.flowersbloom.packet.*;
 import io.github.flowersbloom.udp.Command;
 import io.github.flowersbloom.udp.NettyConstant;
 import io.github.flowersbloom.udp.entity.User;
@@ -19,9 +19,7 @@ import io.netty.channel.socket.DatagramPacket;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 
 @Slf4j
@@ -34,12 +32,12 @@ public class MessagePushHandler extends SimpleChannelInboundHandler<DatagramPack
         ByteBuf byteBuf = msg.content();
         long serialNumber = byteBuf.readLong();
         byte command = byteBuf.readByte();
-        byte[] dst = new byte[byteBuf.readableBytes()];
-        byteBuf.readBytes(dst);
+        byte[] contentBt = new byte[byteBuf.readableBytes()];
+        byteBuf.readBytes(contentBt);
 
         switch (command) {
             case Command.HEARTBEAT_PACKET:
-                HeartbeatPacket heartbeatPacket = JSON.parseObject(new String(dst), HeartbeatPacket.class);
+                HeartbeatPacket heartbeatPacket = JSON.parseObject(new String(contentBt), HeartbeatPacket.class);
                 User user = Objects.requireNonNull(heartbeatPacket.getUser(), "user is null");
                 user.setAddress(msg.sender());
                 if (!NettyConstant.USER_ACTIVE_MAP.containsKey(user.getUserId())) {
@@ -48,12 +46,17 @@ public class MessagePushHandler extends SimpleChannelInboundHandler<DatagramPack
                 }
                 NettyConstant.HEARTBEAT_ACTIVE_MAP.put(user.getUserId(), System.currentTimeMillis());
                 break;
+            case Command.CONFIRM_PACKET:
+                ConfirmPacket confirmPacket = JSON.parseObject(new String(contentBt), ConfirmPacket.class);
+                user = NettyConstant.USER_ACTIVE_MAP.get(confirmPacket.getSenderId());
+                if (user != null) {
+                    sendAckPacket(serialNumber, ctx.channel(), user.getAddress());
+                }
+                break;
             case BizCommand.P2P_DATA_PACKET:
-                P2PDataPacket p2PDataPacket = JSON.parseObject(new String(dst), P2PDataPacket.class);
-                byteBuf = ByteBufAllocator.DEFAULT.buffer();
-                byteBuf.writeLong(serialNumber);
-                byteBuf.writeByte(p2PDataPacket.getCommand());
-                byteBuf.writeBytes(dst);
+                P2PDataPacket p2PDataPacket = JSON.parseObject(new String(contentBt), P2PDataPacket.class);
+                p2PDataPacket.setCommand(command);
+                byteBuf = p2PDataPacket.toNewBuf(serialNumber);
                 user = NettyConstant.USER_ACTIVE_MAP.get(p2PDataPacket.getReceiverId());
                 if (user != null) {
                     ctx.channel().writeAndFlush(new DatagramPacket(
@@ -65,22 +68,56 @@ public class MessagePushHandler extends SimpleChannelInboundHandler<DatagramPack
                 }
                 break;
             case BizCommand.BROADCAST_DATA_PACKET:
-                BroadcastDataPacket broadcastDataPacket = JSON.parseObject(new String(dst), BroadcastDataPacket.class);
+                BroadcastDataPacket broadcastDataPacket = JSON.parseObject(new String(contentBt), BroadcastDataPacket.class);
                 Set<Map.Entry<String, User>> entrySet = NettyConstant.USER_ACTIVE_MAP.entrySet();
                 for (Map.Entry<String, User> entry : entrySet) {
                     User value = entry.getValue();
                     if (!broadcastDataPacket.getSenderId().equals(value.getUserId())) {
                         ctx.channel().writeAndFlush(new DatagramPacket(
-                                Unpooled.copiedBuffer(dst), value.getAddress()
+                                Unpooled.copiedBuffer(contentBt), value.getAddress()
                         ));
                     }
                 }
                 break;
-            case Command.CONFIRM_PACKET:
-                ConfirmPacket confirmPacket = JSON.parseObject(new String(dst), ConfirmPacket.class);
-                user = NettyConstant.USER_ACTIVE_MAP.get(confirmPacket.getSenderId());
+            case BizCommand.ACTIVE_QUERY_PACKET:
+                ActiveDataPacket activeDataPacket = new ActiveDataPacket();
+                List<User> activeList = new ArrayList<>();
+                activeDataPacket.setActiveList(activeList);
+                entrySet = NettyConstant.USER_ACTIVE_MAP.entrySet();
+                for (Map.Entry<String, User> entry : entrySet) {
+                    activeList.add(entry.getValue());
+                }
+                byteBuf = activeDataPacket.toNewBuf(serialNumber);
+                ctx.channel().writeAndFlush(new DatagramPacket(
+                        byteBuf, msg.sender()
+                ));
+                break;
+            case BizCommand.ADDRESS_QUERY_PACKET:
+                String userId = new String(contentBt);
+                user = NettyConstant.USER_ACTIVE_MAP.get(userId);
                 if (user != null) {
-                    sendAckPacket(serialNumber, ctx.channel(), user.getAddress());
+                    AddressDataPacket addressDataPacket = new AddressDataPacket();
+                    addressDataPacket.setIp(user.getAddress().getHostString());
+                    addressDataPacket.setPort(user.getAddress().getPort());
+                    byteBuf = addressDataPacket.toNewBuf(serialNumber);
+                    ctx.channel().writeAndFlush(new DatagramPacket(
+                            byteBuf, msg.sender()
+                    ));
+                }
+                break;
+            case BizCommand.VIDEO_CALL_PACKET:
+                JSONObject jsonObject = JSON.parseObject(new String(contentBt));
+                String senderId = String.valueOf(jsonObject.get("senderId"));
+                String receiverId = String.valueOf(jsonObject.get("receiverId"));
+                user = NettyConstant.USER_ACTIVE_MAP.get(receiverId);
+                if (user != null) {
+                    VideoCallPacket videoCallPacket = new VideoCallPacket();
+                    videoCallPacket.setSenderId(senderId);
+                    videoCallPacket.setReceiverId(receiverId);
+                    byteBuf = videoCallPacket.toNewBuf(serialNumber);
+                    ctx.channel().writeAndFlush(new DatagramPacket(
+                            byteBuf, user.getAddress()
+                    ));
                 }
                 break;
             default:
