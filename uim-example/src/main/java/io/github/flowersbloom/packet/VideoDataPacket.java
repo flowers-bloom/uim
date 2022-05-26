@@ -1,6 +1,7 @@
-package io.github.flowersbloom.udp.packet;
+package io.github.flowersbloom.packet;
 
-import io.github.flowersbloom.udp.Command;
+import io.github.flowersbloom.command.BizCommand;
+import io.github.flowersbloom.udp.packet.BasePacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class VideoDataPacket extends BasePacket {
     byte[] bytes;
 
     public VideoDataPacket() {
-        this.command = Command.VIDEO_DATA_PACKET;
+        this.command = BizCommand.VIDEO_DATA_PACKET;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class VideoDataPacket extends BasePacket {
             ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
             list.add(byteBuf);
             byteBuf.writeLong(this.serialNumber);
-            byteBuf.writeByte(Command.VIDEO_DATA_PACKET);
+            byteBuf.writeByte(this.command);
             byteBuf.writeInt(sliceNum);
             byteBuf.writeBytes(raw);
         }

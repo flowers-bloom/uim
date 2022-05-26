@@ -1,8 +1,8 @@
-package io.github.flowersbloom.udp.packet;
+package io.github.flowersbloom.packet;
 
 import com.alibaba.fastjson.JSON;
-import io.github.flowersbloom.udp.Command;
-import io.github.flowersbloom.udp.entity.User;
+import io.github.flowersbloom.command.BizCommand;
+import io.github.flowersbloom.udp.packet.BasePacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import lombok.Data;
@@ -10,14 +10,16 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 心跳报文
+ * 点对点数据报文
  */
 @Data
-public class HeartbeatPacket extends BasePacket {
-    User user;
+public class P2PDataPacket extends BasePacket {
+    String senderId;
+    String receiverId;
+    String content;
 
-    public HeartbeatPacket() {
-        this.command = Command.HEARTBEAT_PACKET;
+    public P2PDataPacket() {
+        this.command = BizCommand.P2P_DATA_PACKET;
     }
 
     @Override
@@ -25,8 +27,9 @@ public class HeartbeatPacket extends BasePacket {
         ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
         this.serialNumber = generateSerialNumber();
         byteBuf.writeLong(this.serialNumber);
-        byteBuf.writeByte(this.command);
-        byteBuf.writeBytes(JSON.toJSONString(this).getBytes());
+        byteBuf.writeByte(command);
+        String json = JSON.toJSONString(this);
+        byteBuf.writeBytes(json.getBytes());
         return byteBuf;
     }
 

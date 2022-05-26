@@ -1,12 +1,13 @@
 package io.github.flowersbloom.handler;
 
 import com.alibaba.fastjson.JSON;
+import io.github.flowersbloom.command.BizCommand;
 import io.github.flowersbloom.udp.Command;
 import io.github.flowersbloom.udp.NettyConstant;
 import io.github.flowersbloom.udp.handler.MessageCallback;
 import io.github.flowersbloom.udp.packet.AckPacket;
 import io.github.flowersbloom.udp.packet.ConfirmPacket;
-import io.github.flowersbloom.udp.packet.P2PDataPacket;
+import io.github.flowersbloom.packet.P2PDataPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
@@ -55,7 +56,7 @@ public class MessageAcceptHandler extends SimpleChannelInboundHandler<DatagramPa
                 notice(ackPacket);
                 log.info("serialNumber:{} ack", serialNumber);
                 break;
-            case Command.P2P_DATA_PACKET:
+            case BizCommand.P2P_DATA_PACKET:
                 byte[] dst = new byte[byteBuf.readableBytes()];
                 byteBuf.readBytes(dst);
                 P2PDataPacket p2PDataPacket = JSON.parseObject(new String(dst), P2PDataPacket.class);
@@ -70,7 +71,7 @@ public class MessageAcceptHandler extends SimpleChannelInboundHandler<DatagramPa
                 byteBuf.writeBytes(out.getBytes());
                 ctx.channel().writeAndFlush(new DatagramPacket(byteBuf, msg.sender()));
                 break;
-            case Command.VIDEO_HEADER_PACKET:
+            case BizCommand.VIDEO_HEADER_PACKET:
                 int totalCount = byteBuf.readInt();
                 VideoContainer container = new VideoContainer(totalCount);
                 MULTIPLE_SLICE_CACHE.put(serialNumber, container);
@@ -89,7 +90,7 @@ public class MessageAcceptHandler extends SimpleChannelInboundHandler<DatagramPa
                     }
                 });
                 break;
-            case Command.VIDEO_DATA_PACKET:
+            case BizCommand.VIDEO_DATA_PACKET:
                 int sliceId = byteBuf.readInt();
                 byte[] dst2 = new byte[byteBuf.readableBytes()];
                 byteBuf.readBytes(dst2);

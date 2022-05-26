@@ -1,12 +1,9 @@
 package io.github.flowersbloom.udp;
 
-import com.alibaba.fastjson.JSON;
 import io.github.flowersbloom.udp.entity.User;
-import io.github.flowersbloom.udp.packet.BasePacket;
 import io.github.flowersbloom.udp.packet.HeartbeatPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -68,12 +65,9 @@ public class NettyClient {
 
     private void startHeartbeatCycleTask() {
         HEARTBEAT_EXECUTOR.scheduleAtFixedRate(() -> {
-            ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
             HeartbeatPacket heartbeatPacket = new HeartbeatPacket();
             heartbeatPacket.setUser(user);
-            byteBuf.writeLong(BasePacket.generateSerialNumber());
-            byteBuf.writeByte(heartbeatPacket.getCommand());
-            byteBuf.writeBytes(JSON.toJSONString(heartbeatPacket).getBytes());
+            ByteBuf byteBuf = heartbeatPacket.toNewBuf();
             sendMessage(byteBuf, serverAddress);
         }, 0, NettyConstant.HEARTBEAT_SEND_RATE_SECONDS, TimeUnit.SECONDS);
         log.info("start heartbeat send cycle task");

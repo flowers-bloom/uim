@@ -1,24 +1,21 @@
-package io.github.flowersbloom.udp.packet;
+package io.github.flowersbloom.packet;
 
 import com.alibaba.fastjson.JSON;
-import io.github.flowersbloom.udp.Command;
+import io.github.flowersbloom.command.BizCommand;
+import io.github.flowersbloom.udp.entity.User;
+import io.github.flowersbloom.udp.packet.BasePacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import lombok.Data;
 
 import java.util.List;
 
-/**
- * 点对点数据报文
- */
 @Data
-public class P2PDataPacket extends BasePacket {
-    String senderId;
-    String receiverId;
-    String content;
+public class ActiveDataPacket extends BasePacket {
+    List<User> activeList;
 
-    public P2PDataPacket() {
-        this.command = Command.P2P_DATA_PACKET;
+    public ActiveDataPacket() {
+        this.command = BizCommand.ACTIVE_DATA_PACKET;
     }
 
     @Override
@@ -26,7 +23,7 @@ public class P2PDataPacket extends BasePacket {
         ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
         this.serialNumber = generateSerialNumber();
         byteBuf.writeLong(this.serialNumber);
-        byteBuf.writeByte(command);
+        byteBuf.writeByte(this.command);
         String json = JSON.toJSONString(this);
         byteBuf.writeBytes(json.getBytes());
         return byteBuf;

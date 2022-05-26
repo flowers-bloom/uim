@@ -1,6 +1,7 @@
-package io.github.flowersbloom.udp.packet;
+package io.github.flowersbloom.packet;
 
-import io.github.flowersbloom.udp.Command;
+import io.github.flowersbloom.command.BizCommand;
+import io.github.flowersbloom.udp.packet.BasePacket;
 import io.netty.buffer.ByteBuf;
 import lombok.Data;
 
@@ -15,7 +16,7 @@ public class BroadcastDataPacket extends BasePacket {
     String content;
 
     public BroadcastDataPacket() {
-        this.command = Command.BROADCAST_DATA_PACKET;
+        this.command = BizCommand.BROADCAST_DATA_PACKET;
     }
 
     @Override

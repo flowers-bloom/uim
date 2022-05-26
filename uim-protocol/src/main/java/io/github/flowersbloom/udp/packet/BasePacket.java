@@ -10,10 +10,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class BasePacket implements Serializable, Transform {
     private static final AtomicLong counter = new AtomicLong(1);
     protected static final int DEFAULT_SLICE_LENGTH = 500;
-    transient long serialNumber;
-    transient byte command;
+    public transient long serialNumber;
+    public transient byte command;
 
-    public static long generateSerialNumber() {
+    protected static long generateSerialNumber() {
         return counter.getAndIncrement();
     }
 }

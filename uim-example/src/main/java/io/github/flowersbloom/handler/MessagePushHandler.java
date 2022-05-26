@@ -1,6 +1,9 @@
 package io.github.flowersbloom.handler;
 
 import com.alibaba.fastjson.JSON;
+import io.github.flowersbloom.command.BizCommand;
+import io.github.flowersbloom.packet.BroadcastDataPacket;
+import io.github.flowersbloom.packet.P2PDataPacket;
 import io.github.flowersbloom.udp.Command;
 import io.github.flowersbloom.udp.NettyConstant;
 import io.github.flowersbloom.udp.entity.User;
@@ -45,7 +48,7 @@ public class MessagePushHandler extends SimpleChannelInboundHandler<DatagramPack
                 }
                 NettyConstant.HEARTBEAT_ACTIVE_MAP.put(user.getUserId(), System.currentTimeMillis());
                 break;
-            case Command.P2P_DATA_PACKET:
+            case BizCommand.P2P_DATA_PACKET:
                 P2PDataPacket p2PDataPacket = JSON.parseObject(new String(dst), P2PDataPacket.class);
                 byteBuf = ByteBufAllocator.DEFAULT.buffer();
                 byteBuf.writeLong(serialNumber);
@@ -61,7 +64,7 @@ public class MessagePushHandler extends SimpleChannelInboundHandler<DatagramPack
                     sendAckPacket(serialNumber, ctx.channel(), msg.sender());
                 }
                 break;
-            case Command.BROADCAST_DATA_PACKET:
+            case BizCommand.BROADCAST_DATA_PACKET:
                 BroadcastDataPacket broadcastDataPacket = JSON.parseObject(new String(dst), BroadcastDataPacket.class);
                 Set<Map.Entry<String, User>> entrySet = NettyConstant.USER_ACTIVE_MAP.entrySet();
                 for (Map.Entry<String, User> entry : entrySet) {

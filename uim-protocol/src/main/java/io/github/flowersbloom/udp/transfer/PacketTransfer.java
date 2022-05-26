@@ -5,7 +5,6 @@ import io.github.flowersbloom.udp.NettyConstant;
 import io.github.flowersbloom.udp.handler.MessageCallback;
 import io.github.flowersbloom.udp.handler.MessageListener;
 import io.github.flowersbloom.udp.packet.BasePacket;
-import io.github.flowersbloom.udp.packet.VideoDataPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
@@ -80,11 +79,9 @@ public class PacketTransfer implements MessageListener {
     }
 
     private void sendMultipleSlice() {
-        if (dataPacket instanceof VideoDataPacket) {
-            List<ByteBuf> bufList = dataPacket.toNewBufList(headerPacket.getSerialNumber());
-            for (ByteBuf byteBuf : bufList) {
-                channel.writeAndFlush(new DatagramPacket(byteBuf, address));
-            }
+        List<ByteBuf> bufList = dataPacket.toNewBufList(headerPacket.getSerialNumber());
+        for (ByteBuf byteBuf : bufList) {
+            channel.writeAndFlush(new DatagramPacket(byteBuf, address));
         }
     }
 
