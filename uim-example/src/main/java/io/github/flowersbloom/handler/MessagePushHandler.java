@@ -1,14 +1,15 @@
 package io.github.flowersbloom.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import io.github.flowersbloom.command.BizCommand;
 import io.github.flowersbloom.packet.*;
 import io.github.flowersbloom.udp.Command;
 import io.github.flowersbloom.udp.NettyConstant;
 import io.github.flowersbloom.udp.entity.User;
 import io.github.flowersbloom.udp.handler.MessageCallback;
-import io.github.flowersbloom.udp.packet.*;
+import io.github.flowersbloom.udp.packet.AckPacket;
+import io.github.flowersbloom.udp.packet.ConfirmPacket;
+import io.github.flowersbloom.udp.packet.HeartbeatPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -106,14 +107,10 @@ public class MessagePushHandler extends SimpleChannelInboundHandler<DatagramPack
                 }
                 break;
             case BizCommand.VIDEO_CALL_PACKET:
-                JSONObject jsonObject = JSON.parseObject(new String(contentBt));
-                String senderId = String.valueOf(jsonObject.get("senderId"));
-                String receiverId = String.valueOf(jsonObject.get("receiverId"));
-                user = NettyConstant.USER_ACTIVE_MAP.get(receiverId);
+                VideoCallPacket videoCallPacket = JSON.parseObject(new String(contentBt), VideoCallPacket.class);
+                user = NettyConstant.USER_ACTIVE_MAP.get(videoCallPacket.getReceiverId());
                 if (user != null) {
-                    VideoCallPacket videoCallPacket = new VideoCallPacket();
-                    videoCallPacket.setSenderId(senderId);
-                    videoCallPacket.setReceiverId(receiverId);
+                    videoCallPacket.setSenderAddress(msg.sender());
                     byteBuf = videoCallPacket.toNewBuf(serialNumber);
                     ctx.channel().writeAndFlush(new DatagramPacket(
                             byteBuf, user.getAddress()

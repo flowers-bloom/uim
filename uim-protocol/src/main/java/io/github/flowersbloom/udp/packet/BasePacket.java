@@ -23,6 +23,7 @@ public abstract class BasePacket implements Serializable, Transform {
 
     @Override
     public ByteBuf toNewBuf(long serialNumber) {
+        this.serialNumber = serialNumber;
         if (serialNumber == 0) {
             this.serialNumber = generateSerialNumber();
         }
@@ -34,6 +35,10 @@ public abstract class BasePacket implements Serializable, Transform {
 
     @Override
     public List<ByteBuf> toNewBufList(long serialNumber) {
+        this.serialNumber = serialNumber;
+        if (serialNumber == 0) {
+            this.serialNumber = generateSerialNumber();
+        }
         return new ArrayList<>();
     }
 }

@@ -25,16 +25,16 @@ public class Client {
 
     public static void main(String[] args) {
         User user = new User("2", "tom", "",
-                new InetSocketAddress(9002));
+                new InetSocketAddress(9001));
         NettyClient nettyClient = new NettyClient(
                 user,
                 serverAddress,
                 new ChannelInboundHandler[]{new MessageAcceptHandler()}
         );
 
-//        execBatchTask(nettyClient.datagramChannel);
+        execBatchTask(nettyClient.datagramChannel);
 
-        run(nettyClient, user);
+//        run(nettyClient, user);
 
         //nettyClient.shutdown();
         try {
@@ -54,6 +54,11 @@ public class Client {
             new Thread(() -> {
                 sendFileStream(channel);
             }).start();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

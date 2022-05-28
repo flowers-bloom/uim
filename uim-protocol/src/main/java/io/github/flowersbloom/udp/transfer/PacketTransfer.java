@@ -50,7 +50,7 @@ public class PacketTransfer implements MessageListener {
     private void execHeader() {
         if (headerPacket != null) {
             for (int i = 0; i < 3 && !confirm; i++) {
-                sendPacket(headerPacket);
+                sendPacket();
                 try {
                     cyclicBarrier.await(NettyConstant.MSG_SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 } catch (Exception e) {
@@ -65,7 +65,7 @@ public class PacketTransfer implements MessageListener {
         cyclicBarrier.reset();
         for (int i = 0; i < 3 && !confirm; i++) {
             if (!isSlice) {
-                sendPacket(dataPacket);
+                sendPacket();
             }else {
                 sendMultipleSlice();
             }
@@ -78,14 +78,15 @@ public class PacketTransfer implements MessageListener {
     }
 
     private void sendMultipleSlice() {
+        log.info("header serialNumber:{}", headerPacket.getSerialNumber());
         List<ByteBuf> bufList = dataPacket.toNewBufList(headerPacket.getSerialNumber());
         for (ByteBuf byteBuf : bufList) {
             channel.writeAndFlush(new DatagramPacket(byteBuf, address));
         }
     }
 
-    private void sendPacket(BasePacket basePacket) {
-        ByteBuf byteBuf = basePacket.toNewBuf(basePacket.serialNumber);
+    private void sendPacket() {
+        ByteBuf byteBuf = headerPacket.toNewBuf(headerPacket.getSerialNumber());
         channel.writeAndFlush(new DatagramPacket(byteBuf, address));
     }
 
